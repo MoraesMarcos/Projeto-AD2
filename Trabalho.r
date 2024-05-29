@@ -33,3 +33,24 @@ plot(data_decomp,"Decomposição da Série Temporal - Método decompose")
 # A tendência crescente mostra o aumento geral no consumo de gás ao longo dos anos.
 # A componente sazonal mostra um padrão que se repete anualmente.
 # A componente residual captura as variações que não são explicadas pela tendência ou sazonalidade, incluindo ruídos. Podemos ver inicialmente um decrescimento do resíduos até pouco antes dos anos 80, quando ele volta a crescer e variar cada vez mais a cada ano.
+
+#Aplicando Holt-Winters para sazonalidade mutiplicativa <<<< Método escolhido para esse projeto
+holt_wintersM<-hw(gas,seasonal="multiplicative", h=24)
+summary(holt_wintersM)
+autoplot(holt_wintersM)
+autoplot(forecast(holt_wintersM))
+
+#Aplicando Holt-Winters para sazonalidade aditiva
+holt_wintersA<-hw(gas,seasonal="additive", h=24)
+summary(holt_wintersA)
+autoplot(holt_wintersA)
+
+#Aplicando método de Holt
+holt_gas<-holt(gas,h=24)
+summary(holt_gas)
+autoplot(holt_gas)
+
+#Aplicando MAE
+AESimples_gas <- ses(gas, h=24)
+summary(AESimples_gas)
+autoplot(AESimples_gas)
