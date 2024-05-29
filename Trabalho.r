@@ -72,3 +72,64 @@ acf(residuals, main = "Função de Autocorrelação dos Resíduos")
 qqnorm(residuals)
 qqline(residuals, col="red")
 shapiro.test(residuals)
+
+
+
+#Regreção
+
+# Carregar o pacote forecast
+library(forecast)
+
+# Carregar a série temporal gas
+data("gas")
+
+# Criar um dataframe com a série gas e uma variável de tempo
+gas_data <- data.frame(
+  time = time(gas),
+  gas = as.numeric(gas)
+)
+
+# Ajustar um modelo de regressão linear simples
+model <- lm(gas ~ time, data = gas_data)
+
+# Resumo do modelo
+summary(model)
+
+# Plotar a série temporal e a linha de regressão
+plot(gas, main="Produção de Gás Natural na Austrália", ylab="Produção (milhões de metros cúbicos)", xlab="Tempo")
+abline(model, col="red")
+
+
+# Previsões para os próximos 24 meses
+start_time <- max(gas_data$time)
+time_intervals <- start_time + seq(0.083, 0.083 * 24, by = 0.083)
+
+# Inicializar um dataframe para armazenar as previsões
+forecast_results <- data.frame(
+  time = time_intervals,
+  fit = numeric(length(time_intervals)),
+  lwr = numeric(length(time_intervals)),
+  upr = numeric(length(time_intervals))
+)
+
+# Loop para gerar previsões com intervalos de confiança
+for (i in 1:length(time_intervals)) {
+  previsao <- predict(model,
+                      newdata = data.frame(time = time_intervals[i]),
+                      interval = "prediction",
+                      level = 0.95)
+  
+  forecast_results$fit[i] <- previsao[1, "fit"]
+  forecast_results$lwr[i] <- previsao[1, "lwr"]
+  forecast_results$upr[i] <- previsao[1, "upr"]
+}
+
+# Mostrar resultados das previsões
+print(forecast_results)
+
+# Plotar a série temporal original e as previsões
+
+lines(forecast_results$time, forecast_results$fit, col="blue", lwd=3)
+lines(forecast_results$time, forecast_results$lwr, col="red", lty=2, lwd=2)
+lines(forecast_results$time, forecast_results$upr, col="red", lty=2, lwd=2)
+abline(model, col="green", lwd=2)
