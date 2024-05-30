@@ -91,12 +91,6 @@ checkresiduals(holt_wintersM)
 
 #Regressão Linear
 
-# Carregar o pacote forecast
-library(forecast)
-
-# Carregar a série temporal gas
-data("gas")
-
 # Criar um dataframe com a série gas e uma variável de tempo
 gas_data <- data.frame(
   time = time(gas),
