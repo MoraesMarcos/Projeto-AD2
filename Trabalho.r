@@ -59,7 +59,7 @@ AESimples_gas <- ses(gas, h=24)
 summary(AESimples_gas)
 autoplot(AESimples_gas)
 
-#Comparação dos erros os métodos Holt Winters Mulpliticative e Additive
+#Comparação dos erros entre os métodos Holt Winters Mulpliticative e Additive
 
 accuracy(holt_wintersM)
 accuracy(holt_wintersA)
@@ -75,7 +75,7 @@ shapiro.test(residuals)
 
 
 
-#Regreção
+#Regressão Linear
 
 # Carregar o pacote forecast
 library(forecast)
