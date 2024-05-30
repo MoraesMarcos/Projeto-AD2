@@ -11,13 +11,13 @@ show(data)
 str(data)
 
 # Plotando gráfico temporal
-plot(data, main="Consumo mensal de gás na Austrália", ylab="Gás (milhões de metros cúbicos)", xlab="Ano")
-monthplot(gas, main="Variação sazonal mensal do consumo de gás", ylab="Gás (milhões de metros cúbicos)", xlab="Mês")
+plot(data, main="Produção mensal de gás na Austrália", ylab="Gás (milhões de metros cúbicos)", xlab="Ano")
+monthplot(gas, main="Variação sazonal mensal do produção de gás", ylab="Gás (milhões de metros cúbicos)", xlab="Mês")
 
 
-## Tendência: A série apresenta uma tendência ascendente ao longo do tempo, indicando um aumento no consumo de gás na Austrália durante o período analisado.
+## Tendência: A série apresenta uma tendência ascendente ao longo do tempo, indicando um aumento na produção de gás na Austrália durante o período analisado.
 ## Sazonalidade: Há uma forte componente sazonal, com padrões que se repetem anualmente, aumentando a cada ano, indicando a presença de uma sazonalidade multiplicativa.
-## Variabilidade: A amplitude das variações sazonais parece aumentar ao longo do tempo, sugerindo que a variabilidade no consumo de gás se torna mais pronunciada nos anos mais recentes.
+## Variabilidade: A amplitude das variações sazonais parece aumentar ao longo do tempo, sugerindo que a variabilidade na  produção de gás se torna mais pronunciada nos anos mais recentes.
 
 ################################################################################
 
@@ -30,10 +30,13 @@ data_decomp <- decompose(data, type="multiplicative")
 # Plotar a decomposição com decompose
 autoplot(data_decomp)
 
-# A tendência crescente mostra o aumento geral no consumo de gás ao longo dos anos.
+# A tendência crescente mostra o aumento geral na produção de gás ao longo dos anos.
 # A componente sazonal mostra um padrão que se repete anualmente.
 # A componente residual captura as variações que não são explicadas pela tendência ou sazonalidade, incluindo ruídos. Podemos ver inicialmente um decrescimento do resíduos até pouco antes dos anos 80, quando ele volta a crescer e variar cada vez mais a cada ano.
 
+################################################################################
+
+## 3. Aplicação dos métodos de previsão, cálculo dos erros, e gráfico otimizado
 
 #Aplicando Holt-Winters para sazonalidade mutiplicativa <<<< Método escolhido para esse projeto
 holt_wintersM<-hw(gas,seasonal="multiplicative", h=24)
@@ -41,7 +44,7 @@ summary(holt_wintersM)
 autoplot(holt_wintersM)
 autoplot(forecast(holt_wintersM))
 
-plot(holt_wintersM, main="Previsão Holt-Winters Otimizada para Consumo de Gás")
+plot(holt_wintersM, main="Previsão Holt-Winters Otimizada para Produção de Gás")
 lines(fitted(holt_wintersM), col = "red")
 
 #Aplicando Holt-Winters para sazonalidade aditiva
@@ -59,21 +62,25 @@ AESimples_gas <- ses(gas, h=24)
 summary(AESimples_gas)
 autoplot(AESimples_gas)
 
-#Comparação dos erros entre os métodos Holt Winters Mulpliticative e Additive
+#Comparação dos erros entre os métodos
 
 accuracy(holt_wintersM)
 accuracy(holt_wintersA)
+accuracy(holt_gas)
+accuracy(AESimples_gas)
 
-checkresiduals(holt_wintersM)
+################################################################################
 
-# 4. Análise dos resíduos
+## 4. Análise dos resíduos
 residuals <- residuals(holt_wintersM)
 acf(residuals, main = "Função de Autocorrelação dos Resíduos")
 qqnorm(residuals)
 qqline(residuals, col="red")
 shapiro.test(residuals)
 
+checkresiduals(holt_wintersM)
 
+################################################################################
 
 #Regressão Linear
 
