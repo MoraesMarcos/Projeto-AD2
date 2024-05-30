@@ -1,9 +1,15 @@
+
 ### Trabalho 2 A.D.
 ## 1. Construam um gráfico temporal da série cronológica e descrevam as suas
 # principais características. 
 
+install.packages("dplyr")
+library(dplyr)
+
 install.packages("forecast")
+install.packages("lmtest")
 library(forecast)
+library(lmtest)
 
 data <- gas
 show(data)
@@ -144,12 +150,105 @@ abline(model, col="green", lwd=2)
 
 # Verificação dos pressupostos do Modelo
 # Independencia
-plot(residuals(modelo_regressao), col="red")
+plot(residuals(model), col="red")
 abline(h = 0, lty = 2, lwd = 1.5)
 
 #Normalidade
-shapiro_reg <- shapiro.test(residuals(modelo_regressao))
+shapiro_reg <- shapiro.test(residuals(model))
 shapiro_reg
 
 #Homocedasticidade
-bptest(modelo_regressao)
+bptest(model)
+
+# Juntando todos os dados em um único dataframe
+forecasts_HWM <- forecast(holt_wintersM)
+forecasts_HWA <- forecast(holt_wintersA)
+forecasts_HOLT <- forecast(holt_gas)
+forecasts_AES <- forecast(AESimples_gas)
+
+forecastHWM_mean <- as.numeric(forecasts_HWM$mean)
+forecastHWM_time <- time(forecasts_HWM$mean)
+
+forecastHWA_mean <- as.numeric(forecasts_HWA$mean)
+forecastHWA_time <- time(forecasts_HWA$mean)
+
+forecastHOLT_mean <- as.numeric(forecasts_HOLT$mean)
+forecastHOLT_time <- time(forecasts_HOLT$mean)
+
+forecastAES_mean <- as.numeric(forecasts_AES$mean)
+forecastAES_time <- time(forecasts_AES$mean)
+
+
+df_HWM <- data.frame(
+  Time = forecastHWM_time,
+  Forecast = forecastHWM_mean
+)
+
+df_HWA <- data.frame(
+  Time = forecastHWA_time,
+  Forecast = forecastHWA_mean
+)
+
+df_HOLT <- data.frame(
+  Time = forecastHOLT_time,
+  Forecast = forecastHOLT_mean
+)
+
+df_AES <- data.frame(
+  Time = forecastAES_time,
+  Forecast = forecastAES_mean
+)
+
+# Função para converter a coluna `time` de formato fracionário para Ano/Mês
+convert_to_year_month <- function(frac_year) {
+  year <- floor(frac_year)
+  month <- round((frac_year - year) * 12)
+  return(sprintf("%d/%02d", year, month))
+}
+
+# Aplicar a função de conversão para a coluna `time`
+forecast_results$time <- sapply(forecast_results$time, convert_to_year_month)
+df_HWM$Time <- sapply(df_HWM$Time, convert_to_year_month)
+df_HWA$Time <- sapply(df_HWA$Time, convert_to_year_month)
+df_HOLT$Time <- sapply(df_HOLT$Time, convert_to_year_month)
+df_AES$Time <- sapply(df_AES$Time, convert_to_year_month)
+
+forecast_results <- forecast_results %>%
+  select(time, fit) %>%
+  rename(`Regressão Linear` = fit)
+
+df_HWM <- df_HWM %>%
+  select(Time, `Forecast`) %>%
+  rename(`Holt Winter Mult` = `Forecast`)
+
+df_HWA <- df_HWA %>%
+  select(Time, `Forecast`) %>%
+  rename(`Holt Winters Adit` = `Forecast`)
+
+df_HOLT <- df_HOLT %>%
+  select(Time, `Forecast`) %>%
+  rename(`Holt` = `Forecast`)
+
+df_AES <- df_AES %>%
+  select(Time, `Forecast`) %>%
+  rename(`AES` = `Forecast`)
+
+# Renomear a coluna `Time` para `time` em todos os dataframes para uniformidade
+df_HWM <- df_HWM %>% rename(time = Time)
+df_HWA <- df_HWA %>% rename(time = Time)
+df_HOLT <- df_HOLT %>% rename(time = Time)
+df_AES <- df_AES %>% rename(time = Time)
+
+# Mesclar todos os dataframes com base na coluna `time`
+combined_df <- forecast_results %>%
+  full_join(df_HWM, by = "time") %>%
+  full_join(df_HWA, by = "time") %>%
+  full_join(df_HOLT, by = "time") %>%
+  full_join(df_AES, by = "time")
+
+# Exibindo o dataframe combinado
+print(combined_df)
+  
+  
+
+
