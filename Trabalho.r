@@ -140,3 +140,15 @@ lines(forecast_results$time, forecast_results$fit, col="blue", lwd=3)
 lines(forecast_results$time, forecast_results$lwr, col="red", lty=2, lwd=2)
 lines(forecast_results$time, forecast_results$upr, col="red", lty=2, lwd=2)
 abline(model, col="green", lwd=2)
+
+# Verificação dos pressupostos do Modelo
+# Independencia
+plot(residuals(modelo_regressao), col="red")
+abline(h = 0, lty = 2, lwd = 1.5)
+
+#Normalidade
+shapiro_reg <- shapiro.test(residuals(modelo_regressao))
+shapiro_reg
+
+#Homocedasticidade
+bptest(modelo_regressao)
